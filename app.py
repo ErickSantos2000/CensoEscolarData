@@ -4,7 +4,7 @@ from pathlib import Path
 from leitura.ler_csv import ler_csv
 from escrita.escrita_branco import gravar_no_banco
 
-banco_dados = Path("/home/erick/atividade/censo-escolar/censoescolar.db")
+banco_dados = Path("coloque_o_caminho_do_banco_de_dados_aqui.db")
 
 def main():
     if not banco_dados.is_file():
