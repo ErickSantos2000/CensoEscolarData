@@ -1,10 +1,13 @@
+
+import io
+ 
 import pandas as pd
-import sqlite3
-
+import psycopg
+ 
 TABELA = "tb_instituicao_ensino"
-
-
-def gravar_no_banco(conexao: sqlite3.Connection, lote: pd.DataFrame):
+ 
+ 
+def gravar_no_banco(conexao: psycopg.Connection, lote: pd.DataFrame):
     colunas = [
         "no_entidade",
         "co_entidade",
@@ -22,14 +25,17 @@ def gravar_no_banco(conexao: sqlite3.Connection, lote: pd.DataFrame):
         "qt_mat_eja",
         "qt_mat_esp",
     ]
-
+ 
     lote = lote[colunas]
-
-    lote.to_sql(
-        name=TABELA,
-        con=conexao,
-        if_exists="append",
-        index=False
-    )
-
+ 
+    buffer = io.StringIO()
+    lote.to_csv(buffer, index=False, header=False)
+    
+    comando = f"COPY {TABELA} ({', '.join(colunas)}) FROM STDIN WITH (FORMAT csv)"
+ 
+    with conexao.cursor() as cursor:
+        with cursor.copy(comando) as copy:
+            copy.write(buffer.getvalue())
+ 
     return len(lote)
+ 
